@@ -176,8 +176,7 @@ while True:
 
 
     #Screan changing logic
-    if SNAKE_POS[0] == -10:
-        my_socket.send(str(SNAKE_POS).encode())
+
 
 
 

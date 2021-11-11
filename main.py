@@ -5,7 +5,7 @@ import pygame
 import time
 import random
 import socket
-import threading
+
 
 
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,6 +16,8 @@ my_socket.connect((host, port))
 
 
 SNAKE_SPEED = 15
+
+Run_status = True
 
 # Window size
 WINDOW_X = 720
@@ -32,7 +34,7 @@ BLUE = pygame.Color(0, 0, 255)
 pygame.init()
 
 # Initialise game window
-pygame.display.set_caption('GeeksforGeeks Snakes')
+pygame.display.set_caption('Snakes')
 WINDOW = pygame.display.set_mode((WINDOW_X, WINDOW_Y))
 
 # FPS (frames per second) controller
@@ -111,7 +113,10 @@ def game_over():
 
 
 # Main Function
-while True:
+while True :
+
+    SNAKE_POS = SNAKE_POS or pickle.loads(my_socket.recv(1024))
+    SNAKE_BODY = SNAKE_BODY or pickle.loads(my_socket.recv(1024))
 
     # handling key events
     for event in pygame.event.get():
@@ -177,27 +182,31 @@ while True:
     if SNAKE_POS[1] < 0 or SNAKE_POS[1] > WINDOW_Y - 10:
         game_over()
 
-
-
-
     #Screan changing logic
     if SNAKE_POS[0] == -10:
         time_snake_postition = SNAKE_POS[0]   #тимчасова поз змії
         SNAKE_POS.insert(0, 710)
         SNAKE_POS.remove(SNAKE_POS[1])
-        a = pickle.dumps(SNAKE_POS)
-        my_socket.send(a)
-        time.sleep(2)
+        my_socket.send(pickle.dumps(SNAKE_POS))
+        time.sleep(0.5)
         my_socket.send(pickle.dumps(SNAKE_BODY))
         SNAKE_POS.insert(0, time_snake_postition)
         SNAKE_POS.remove(SNAKE_POS[1])
 
 
 
-    # Touching the snake body
+
+
+
+    #Touching the snake body
     for block in SNAKE_BODY[1:]:
         if SNAKE_POS[0] == block[0] and SNAKE_POS[1] == block[1]:
             game_over()
+    else:
+        pass
+
+
+
 
     # displaying SCORE countinuously
     show_score(1, WHITE, 'times new roman', 20)
@@ -209,7 +218,7 @@ while True:
     FPS.tick(SNAKE_SPEED)
     print(SNAKE_POS)
 
-    #position reciving logik
+    #position reciving logic
 
 
 
