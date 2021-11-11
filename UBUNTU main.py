@@ -3,16 +3,16 @@ import pygame
 import time
 import random
 import socket
-import threading
+import pickle
 
 
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "192.168.56.1"  # "127.0.1.1"
-port = 4444
-code = 1
+port = 7777
+
 my_socket.connect((host, port))
-a = 'asda'
-my_socket.send(a.encode())
+
+
 
 SNAKE_SPEED = 15
 
@@ -31,17 +31,17 @@ BLUE = pygame.Color(0, 0, 255)
 pygame.init()
 
 # Initialise game window
-pygame.display.set_caption('GeeksforGeeks Snakes')
+pygame.display.set_caption(' Snakes')
 WINDOW = pygame.display.set_mode((WINDOW_X, WINDOW_Y))
 
 # FPS (frames per second) controller
 FPS = pygame.time.Clock()
 
 # defining snake default position
-SNAKE_POS = my_socket.recv(1024).decode()
-
+SNAKE_POS = pickle.loads(my_socket.recv(1024))
+print(SNAKE_POS)
 # defining first 4 blocks of snake body
-SNAKE_BODY = my_socket.recv(1024).decode('ascii')
+SNAKE_BODY = pickle.loads(my_socket.recv(1024))
 # fruit position
 FRUIT_POS = [random.randrange(1, (WINDOW_X // 10)) * 10,
              random.randrange(1, (WINDOW_Y // 10)) * 10]
@@ -50,7 +50,7 @@ FRUIT_SPAWN = True
 
 # setting default snake direction towards
 # right
-DIRECTION = 'RIGHT'
+DIRECTION = 'LEFT'
 change_to = DIRECTION
 
 # initial SCORE
@@ -166,18 +166,24 @@ while True:
         FRUIT_POS[0], FRUIT_POS[1], 10, 10))
 
     # Game Over conditions
-    if SNAKE_POS[0] > WINDOW_X - 10:
-        game_over()
-
     if SNAKE_POS[1] < 0 or SNAKE_POS[1] > WINDOW_Y - 10:
         game_over()
 
+    #SCREAN CHANHING LOGIK
+    if SNAKE_POS[0] == -10:
+        a = True
+        my_socket.send(pickle.dumps(a))
+        time.sleep(1)
+        time_snake_postition = SNAKE_POS[0]  # тимчасова поз змії
+        SNAKE_POS.insert(0, 710)
+        SNAKE_POS.remove(SNAKE_POS[1])
+        my_socket.send(pickle.dumps(SNAKE_POS))
+        time.sleep(0.5)
+        my_socket.send(pickle.dumps(SNAKE_BODY))
+        SNAKE_POS.insert(0, time_snake_postition)
+        SNAKE_POS.remove(SNAKE_POS[1])
 
-
-
-    #Screan changing logic
-
-
+        
 
 
     # Touching the snake body
@@ -193,3 +199,4 @@ while True:
 
     # Frame Per Second /Refres Rate
     FPS.tick(SNAKE_SPEED)
+    print(SNAKE_POS)
